@@ -26,7 +26,7 @@ def main_parse():
 def parse_data(page):  # на параметр не смотри он духом силен (потом там будет другое)
     current_price = get_current_price()
     response = requests.get(
-        f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&fadd=&ps=100&amt={10_000 // current_price}%7e999999999',
+        f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt={5_000 // current_price}%7e999999999',
         cookies=cookies,
         headers=headers
     )
@@ -34,7 +34,7 @@ def parse_data(page):  # на параметр не смотри он духом
     while response.status_code != 200:
         get_cookies_etherscan()
         response = requests.get(
-            f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&fadd=&ps=100&amt={10_000 // current_price}%7e999999999',
+            f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt={5_000 // current_price}%7e999999999',
             cookies=cookies,
             headers=headers
         )
@@ -43,17 +43,11 @@ def parse_data(page):  # на параметр не смотри он духом
 
     soup = BeautifulSoup(response.text, 'html.parser')
     transactions_soup = BeautifulSoup(str(soup.find_all('tbody', class_='align-middle text-nowrap')), 'html.parser')
-    unchecked_transactions = list(map(str, transactions_soup.find_all('tr')))
-    checked_transactions = list()
-
-    """ Проверяем и добавляем нужные транзакции """
-    for transaction in unchecked_transactions:
-        if not check_keywords(transaction):
-            checked_transactions.append(transaction)
+    transactions = list(map(str, transactions_soup.find_all('tr')))
 
     """ Приводим оставшиеся транзакции в понятный и приятный вид"""
-    with ThreadPoolExecutor(max_workers=3) as executor_form:
-        future_result = (executor_form.submit(form_data, transaction) for transaction in checked_transactions)
+    with ThreadPoolExecutor(max_workers=10) as executor_form:
+        future_result = (executor_form.submit(form_data, transaction) for transaction in transactions)
         for future in concurrent.futures.as_completed(future_result):
             try:
                 data = future.result()
@@ -73,7 +67,7 @@ def get_current_price():
     return price
 
 
-def check_keywords(string_to_be_checked):
+def check_keywords(string_to_be_checked):  # unused
     pattern = '(?:{})'.format('|'.join(keywords))  # паттерн для поиска слов, например: (?:Router|Binance|Mask)
     return bool(re.search(pattern, string_to_be_checked, flags=re.I))
 
@@ -92,4 +86,5 @@ def form_data(transaction_html):
                  'Количество': amount,
                  'Цена в долларах': dollar_price
                  }
+    print(json_data)
     return json_data

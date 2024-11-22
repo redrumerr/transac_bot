@@ -1,3 +1,2 @@
-keywords = ['Router', 'Binance', 'Mask', 'Exchange', 'Coinbase', 'Uniswap',
-            'Kraken', 'Bitfinex', 'Wintermute', 'Bybit', 'Gate', 'OKX', 'Fund',
-            'vikipedia', 'KuCoin', 'Bitstamp', ' BtcTurk', 'MEXC', 'Bot', 'Bitkub']
+keywords = ['aria-label="Contract"', 'images/labels/binancegrayscaled', 'images/labels/bybitgray',
+            'images/labels/cryptocom', 'images/labels/okxgray', ]

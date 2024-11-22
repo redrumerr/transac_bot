@@ -59,6 +59,7 @@ headers_price = {
 
 
 def get_cookies_etherscan():
+    global cookies
     print('Getting cookies...')
 
     options = webdriver.ChromeOptions()
@@ -75,12 +76,12 @@ def get_cookies_etherscan():
         '''
     })
 
-    cookie_handler = CookieHandler(driver, "https://etherscan.io/", overwrite=True, filename="get-stocks",
-                                   wait_time=10)
+    cookie_handler = CookieHandler(driver,
+                                   "https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt=5000%7e999999999",
+                                   overwrite=True, filename="get-stocks", wait_time=10)
     saved_cookies = cookie_handler.save_cookies()
 
     for e in saved_cookies:
-        cookies['_ga_T1JC9RNQXV'] = e['value'] if e['name'] == '_ga_T1JC9RNQXV' else cookies['_ga_T1JC9RNQXV']
-        cookies['cf_clearance'] = e['value'] if e['name'] == 'cf_clearance' else cookies['cf_clearance']
-    print('Cookies collected!')
+        cookies[e['name']] = e['value']
     print(cookies)
+
