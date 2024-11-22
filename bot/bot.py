@@ -8,12 +8,11 @@ from aiogram.filters import Command
 from aiogram.utils import executor
 import json
 
-with open ('secrets.json', 'r') as f:
+with open('secrets.json', 'r') as f:
     data = json.load(f)
     logging.info('Данные из json успешно загружены')
 
 API_TOKEN = data['bot_api']
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -28,14 +27,15 @@ def connect_db():
         host=data['host']
     )
 
-
 class Form(StatesGroup):
     currency_name = State()
 
+
 @dp.message(Command("start"))
 async def start_command(message: types.Message):
-    await message.answer("Введите название криптовалюты:")
+    await message.answer("Привет! Я бот для отслеживания транзакций криптовалют. Введите название криптовалюты:")
     await Form.currency_name.set()
+
 
 @dp.message(State(Form.currency_name))
 async def process_currency_name(message: types.Message, state: FSMContext):
@@ -50,7 +50,6 @@ async def process_currency_name(message: types.Message, state: FSMContext):
     conn.close()
 
     if wallets:
-
         csv_file = 'wallets_info.csv'
         with open(csv_file, mode='w', newline='') as file:
             writer = csv.writer(file)
