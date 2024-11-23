@@ -25,11 +25,10 @@ def main_parse():
 
 def parse_data(page):  # на параметр не смотри он духом силен (потом там будет другое)
     current_price = get_current_price()
-    response = requests.get(
-        f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt={5_000 // current_price}%7e999999999',
-        cookies=cookies,
-        headers=headers
-    )
+    print(current_price)
+    url = f'https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt={5_000 // current_price}%7e999999999'
+    print(url)
+    response = requests.get(url, cookies=cookies, headers=headers)
     print(response)
     while response.status_code != 200:
         get_cookies_etherscan()
@@ -83,8 +82,8 @@ def form_data(transaction_html):
                  'Адрес отправителя': from_address,
                  'Адрес получателя': to_address,
                  'Хэш транзакции': transaction_hash,
-                 'Количество': amount,
-                 'Цена в долларах': dollar_price
+                 'Количество': float(''.join(amount.split(','))),
+                 'Цена в долларах': float(''.join(dollar_price.split(',')))
                  }
     print(json_data)
     return json_data

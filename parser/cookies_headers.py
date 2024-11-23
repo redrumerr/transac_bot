@@ -2,15 +2,16 @@ from seleniumwire import webdriver
 from selenium_cookies import CookieHandler
 
 cookies = {  # без _ga_T1JC9RNQXV и cf_clearance не работает
-    '_ga_T1JC9RNQXV': 'GS1.1.1732214781.10.1.1732216017.56.0.0',
+    '_ga_T1JC9RNQXV': 'GS1.1.1732356873.17.1.1732357259.60.0.0',
     '_ga': 'GA1.2.1342471600.1731936902',
     'etherscan_offset_datetime': '+3',
     '_gid': 'GA1.2.2140093656.1732102175',
     'etherscan_switch_token_amount_value': 'value',
     'etherscan_cookieconsent': 'True',
-    'ASP.NET_SessionId': 'ji4vku4afiz51hdrsstypzzv',
-    '__cflb': '0H28vPcoRrcznZcNZSuFrvaNdHwh857EMRWdxhVJ6AY',
-    'cf_clearance': 'S5.LeU3UYr4auKwg5ntyX4OKncwooZnot215Jh9TwJ0-1732216018-1.2.1.1-AbwIEuE9n_rcZpJKf5nDwsLzXCXnq0vFAREuD4GyTbqMsYylSV0X7t9rW2.h7yI4tj_eDZVJcacb6_ZCdeHoD4P02NqDSnM1dIOk4njL8sikpSBcU_F3I9bzAjeNR4lYB2at2V5Rqg3vgCS7Fpxb.zJw0eNIchKl1_gvX.RgcBHMNLHZbePRy4k0e7GloxHINhpoQql1f_06WVlhXyrscvkOq1mzCogRaJ4Fejf5t76JYe2rfaFpKClRjGM6ks3kzYcUt6PgH7CJxO3h2u0mXPP2t.SkC.YzxRyBChF3_q7A_NgQ0mcuywInOXX24A3dduRS2w0xLb70uWhX8lb0oLqZeJ4tr6i0TxQu9JOOfFwLB3EuQLOT5HFPNGZTC3yIPWoOMa2GcqDChOTgS6tRLA',
+    'ASP.NET_SessionId': 'ezwan2l25pxginwje1qkmksh',
+    '__cflb': '02DiuFnsSsHWYH8WqVXaqGvd6BSBaXQLUmZVDfKn944Xv',
+    'cf_clearance': 'N4OTETCv.GT4VDoz1N25tSElXke29JiXtnIUrKTmbHE-1732356895-1.2.1.1-MvIq37Wn3Oq9ojEAB0dnSlYRiVezlNeOvwaR0mE6yJRAWwZrm4KK0QJBGDHn1fo_wUX_rZcxpwxrDEMeIc.cE6spyA9skcgw7lfCSGsAGh.pLqSxt6jzhCiWD0Tkb0oYyBiNi1kK2pmqSBL8VzQNZZ5SPDH_9LSgw8bfmpGXZvR1IEuUvbyUHTNjjV_ZXaTw72OGZvF8ZgFgR2RvVhCy5f0nbCocKOQ7P8j2hhBGwKUMBUFbY4mXSknJWp43vUTp8xbvdM8d8jr1314KfHOlLXNH.h12TmrkmYcJJwVjELTslFQghuH4ddeF91YNsM7HoEoiO6b5SaVYEKHsWvSBQcFpqLtHyE2Qvmo3NhroSANw0r1OSnRUgwokNMrWzZABeLQS9shVWCEJ4RBiXNvfdw',
+    '_gat_gtag_UA_46998878_6': '1',
 }
 
 headers = {
@@ -77,11 +78,12 @@ def get_cookies_etherscan():
     })
 
     cookie_handler = CookieHandler(driver,
-                                   "https://etherscan.io/advanced-filter?tkn=0x6b3595068778dd592e39a122f4f5a5cf09c90fe2&txntype=2&amt=5000%7e999999999",
+                                   "https://etherscan.io/",
                                    overwrite=True, filename="get-stocks", wait_time=10)
     saved_cookies = cookie_handler.save_cookies()
 
     for e in saved_cookies:
         cookies[e['name']] = e['value']
-    print(cookies)
+    for e in cookies.keys():
+        print(e, cookies[e])
 
