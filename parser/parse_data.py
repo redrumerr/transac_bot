@@ -86,4 +86,9 @@ def form_data(transaction_html):
                  'Цена в долларах': float(''.join(dollar_price.split(',')))
                  }
     print(json_data)
+    
+    import database.database as db
+    db.add_transaction(json_data)
+    
     return json_data
+    
