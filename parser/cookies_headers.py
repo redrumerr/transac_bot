@@ -1,16 +1,16 @@
 from seleniumwire import webdriver
 from selenium_cookies import CookieHandler
 
-cookies = {  # без _ga_T1JC9RNQXV и cf_clearance не работает
-    '_ga_T1JC9RNQXV': 'GS1.1.1732356873.17.1.1732357259.60.0.0',
+cookies = {
+    '_ga_T1JC9RNQXV': 'GS1.1.1732621352.24.1.1732621554.60.0.0',
     '_ga': 'GA1.2.1342471600.1731936902',
     'etherscan_offset_datetime': '+3',
-    '_gid': 'GA1.2.2140093656.1732102175',
     'etherscan_switch_token_amount_value': 'value',
     'etherscan_cookieconsent': 'True',
-    'ASP.NET_SessionId': 'ezwan2l25pxginwje1qkmksh',
-    '__cflb': '02DiuFnsSsHWYH8WqVXaqGvd6BSBaXQLUmZVDfKn944Xv',
-    'cf_clearance': 'N4OTETCv.GT4VDoz1N25tSElXke29JiXtnIUrKTmbHE-1732356895-1.2.1.1-MvIq37Wn3Oq9ojEAB0dnSlYRiVezlNeOvwaR0mE6yJRAWwZrm4KK0QJBGDHn1fo_wUX_rZcxpwxrDEMeIc.cE6spyA9skcgw7lfCSGsAGh.pLqSxt6jzhCiWD0Tkb0oYyBiNi1kK2pmqSBL8VzQNZZ5SPDH_9LSgw8bfmpGXZvR1IEuUvbyUHTNjjV_ZXaTw72OGZvF8ZgFgR2RvVhCy5f0nbCocKOQ7P8j2hhBGwKUMBUFbY4mXSknJWp43vUTp8xbvdM8d8jr1314KfHOlLXNH.h12TmrkmYcJJwVjELTslFQghuH4ddeF91YNsM7HoEoiO6b5SaVYEKHsWvSBQcFpqLtHyE2Qvmo3NhroSANw0r1OSnRUgwokNMrWzZABeLQS9shVWCEJ4RBiXNvfdw',
+    '_gid': 'GA1.2.214684827.1732524561',
+    'ASP.NET_SessionId': '5xb5xnij1xrnkolmi3ub4fnv',
+    '__cflb': '02DiuFnsSsHWYH8WqVXcJWaecAw5gpnmdsYiyyadotJPE',
+    'cf_clearance': 'Nk6dUzJBY4tYBWcr9_eLNqbglvuf5WihUoTOAcvFkKI-1732621442-1.2.1.1-oD0UK9Yb44HWFOywAkNwEd7lUfR2Uqvzn7v6LHZ8uq2OF9q53C_Ci8jRKUbyH9rJpWgeejEaDp0nkfgpnu4QARvkb.g8NoBCUuINFAIhRnGJYRel3Hy4r7p3qGQc6hu0qZ4WwBQ.k_uIkAR4g4GS894hHNthryKgEv5HD9n3_0bmHFj75CbR_iIMrdVBuaQ5O1Swad22y.Y24m0oT0CRpum2SsJ0JImsOzggGlin956xHJQ7Bh8RNpIkGBtffZTIjRxQoQvILgWeub.msalnUQwAb4y6jDveD4v3fonjmenF0pmKuihLpQyVEs.GIVCS8zRZ397wrrK8NMnj3tIO0iHFqmFKwyCImeJXBKQOUDsah0n8I8mEJFsX0fNPObHRVEojdGnul_lTdQCbEaYuzw',
     '_gat_gtag_UA_46998878_6': '1',
 }
 
