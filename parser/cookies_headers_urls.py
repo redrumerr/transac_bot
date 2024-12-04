@@ -1,5 +1,3 @@
-from seleniumwire import webdriver
-from selenium_cookies import CookieHandler
 
 cookies_price = {
     'cmc-language': 'en',

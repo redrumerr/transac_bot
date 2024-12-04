@@ -3,7 +3,7 @@ import csv
 import psycopg2
 import asyncio
 import json
-
+from parser.parse_data import get_holders
 from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -57,43 +57,13 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
     except ValueError:
         await message.answer("Некорректный формат фильтра. Попробуйте снова.")
         return await state.set_state(Form.amount_filter)
+    await get_holders(currency_name, amount_filter)
 
-
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT token_address FROM tokens WHERE name = %s", (currency_name,))
-    token_address_result = cursor.fetchone()
-    cursor.close()
-
-    if not token_address_result:
-        await message.answer("Криптовалюта не найдена в базе.")
-        await state.clear()
-        conn.close()
-        return
-
-    token_address = token_address_result[0]
-
-    query = f"SELECT to_address, tokens_amount FROM transactions WHERE token_address = %s"
-    if amount_filter:
-        query += f" AND token_amount >= {amount_filter}"
-    cursor = conn.cursor()
-    cursor.execute(query, (token_address,))
-    transactions = cursor.fetchall()
-    cursor.close()
-
-    if not transactions:
-        await message.answer("Нет транзакций, соответствующих условиям.")
-        await state.clear()
-        conn.close()
-        return
 
     filename = f"{currency_name}_transactions_{amount_filter}.csv" if amount_filter else f"{currency_name}_transactions.csv"
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Wallet Address', 'Token Amount'])
-        for transaction in transactions:
-            writer.writerow([transaction[0], transaction[1]])
-
 
     confirm_markup = InlineKeyboardMarkup(
         inline_keyboard=[
@@ -102,7 +72,6 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
     )
     await message.answer("Подтвердите фильтр:", reply_markup=confirm_markup)
     await state.clear()
-    conn.close()
 
 
 @dp.callback_query()
