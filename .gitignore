@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+bot/secrets.json
 
 # Translations
 *.mo
