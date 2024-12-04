@@ -1,32 +1,6 @@
 from seleniumwire import webdriver
 from selenium_cookies import CookieHandler
 
-cookies = {
-    '_ga_T1JC9RNQXV': 'GS1.1.1732621352.24.1.1732621554.60.0.0',
-    '_ga': 'GA1.2.1342471600.1731936902',
-    'etherscan_offset_datetime': '+3',
-    'etherscan_switch_token_amount_value': 'value',
-    'etherscan_cookieconsent': 'True',
-    '_gid': 'GA1.2.214684827.1732524561',
-    'ASP.NET_SessionId': '5xb5xnij1xrnkolmi3ub4fnv',
-    '__cflb': '02DiuFnsSsHWYH8WqVXcJWaecAw5gpnmdsYiyyadotJPE',
-    'cf_clearance': 'Nk6dUzJBY4tYBWcr9_eLNqbglvuf5WihUoTOAcvFkKI-1732621442-1.2.1.1-oD0UK9Yb44HWFOywAkNwEd7lUfR2Uqvzn7v6LHZ8uq2OF9q53C_Ci8jRKUbyH9rJpWgeejEaDp0nkfgpnu4QARvkb.g8NoBCUuINFAIhRnGJYRel3Hy4r7p3qGQc6hu0qZ4WwBQ.k_uIkAR4g4GS894hHNthryKgEv5HD9n3_0bmHFj75CbR_iIMrdVBuaQ5O1Swad22y.Y24m0oT0CRpum2SsJ0JImsOzggGlin956xHJQ7Bh8RNpIkGBtffZTIjRxQoQvILgWeub.msalnUQwAb4y6jDveD4v3fonjmenF0pmKuihLpQyVEs.GIVCS8zRZ397wrrK8NMnj3tIO0iHFqmFKwyCImeJXBKQOUDsah0n8I8mEJFsX0fNPObHRVEojdGnul_lTdQCbEaYuzw',
-    '_gat_gtag_UA_46998878_6': '1',
-}
-
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'none',
-    'Sec-Fetch-User': '?1',
-    'Priority': 'u=0, i',
-}
-
 cookies_price = {
     'cmc-language': 'en',
     'sensorsdata2015jssdkcross': '%7B%22distinct_id%22%3A%221934b762a1a245-0dbdc525034d0b8-f575722-1296000-1934b762a1b9f0%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E8%87%AA%E7%84%B6%E6%90%9C%E7%B4%A2%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC%22%2C%22%24latest_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTkzNGI3NjJhMWEyNDUtMGRiZGM1MjUwMzRkMGI4LWY1NzU3MjItMTI5NjAwMC0xOTM0Yjc2MmExYjlmMCJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%22%2C%22value%22%3A%22%22%7D%2C%22%24device_id%22%3A%221934b762a1a245-0dbdc525034d0b8-f575722-1296000-1934b762a1b9f0%22%7D',
@@ -43,6 +17,8 @@ cookies_price = {
     '__gpi': 'UID=00000f9af089681a:T=1732201215:RT=1732201795:S=ALNI_MaYnIxNfScF07F5bUP078WJ0DC8Rg',
     '__eoi': 'ID=3ceb3b22f95193f0:T=1732201215:RT=1732201795:S=AA-AfjaRb8XzVV_vaUhneHid9Oz0',
 }
+
+url = 'https://etherscan.io/exportData?type=tokenholders&decimal=18'
 
 headers_price = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0',

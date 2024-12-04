@@ -6,45 +6,50 @@ import os
 import csv
 import json
 import time
+from parser.cookies_headers_urls import cookies_price, headers_price, url
+from bs4 import BeautifulSoup
+import re
 
 pyautogui.FAILSAFE = True
 
 
-async def get_holders(token_address: str, url: str, lower_limit: int = 5000):
-    current_price = await get_current_price(token_address)
-    lower_limit = lower_limit / current_price
-    webbrowser.register('Firefox', None,
-                        webbrowser.BackgroundBrowser('C:\\Program Files\\Mozilla Firefox\\firefox.exe'))
-    webbrowser.get(using='Firefox').open(url, new=0)
+async def get_holders(token_name: str, lower_limit: int = 5000):
+    current_price, token_address = await get_current_price(token_name)
+    lower_limit /= current_price
+    # webbrowser.register('Firefox', None,
+                      #  webbrowser.BackgroundBrowser('C:\\Program Files\\Mozilla Firefox\\firefox.exe'))
+    webbrowser.open(url, new=0)
     pyautogui.moveTo(668, 1042, 4)  # наводимся на строку ввода токена
     pyautogui.click()
     pyautogui.write(token_address)  # вводим адрес токена
     pyautogui.moveTo(668, 1558, 3)  # наводимся на загрузку csv
     pyautogui.click()
-    time.sleep(25)
-    os.system("taskkill /f /im firefox.exe")
+    time.sleep(10)
+    os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
     downloaded_csv_path = f'C:\\Users\\Александр\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
-    i = 0
     with open(downloaded_csv_path, 'r') as csv_file:
         fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
         reader = csv.DictReader(csv_file, fieldnames)
         for row in reader:
-            # if int(row['balance'])
-            print(row)
-    time.sleep(5)
-    print(i)
+            try:
+                if float(''.join(row['Balance'].split(','))) >= lower_limit:
+                    print(row)
+            except ValueError:
+                pass
+    time.sleep(3)
     os.remove(downloaded_csv_path)
 
 
-async def get_current_price(token_address: str):
-    response = requests.get('https://coinmarketcap.com/currencies/sushiswap/',
+async def get_current_price(token_name: str):  # token_name вводится Михой
+    response = requests.get(f'https://coinmarketcap.com/currencies/{token_name.lower()}/',
                             # Находим страницу нужной криптовалюты на CoinMarketCap
                             cookies=cookies_price, headers=headers_price)
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    token_address = re.findall('contractAddress":"0x[\da-zA-Z]+', str(soup))[0][18:]
     price = float(re.findall('\$[\d.]+', str(soup.find_all('span', class_='sc-65e7f566-0 WXGwg base-text')[0]))[0][
                   1:])  # Находим цену на странице и преобразуем её
-    return price
+    return price, token_address
 
 
 async def form_data(transaction_html):
