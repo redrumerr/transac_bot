@@ -24,7 +24,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000):
     pyautogui.write(token_address)  # вводим адрес токена
     pyautogui.moveTo(668, 1558, 3)  # наводимся на загрузку csv
     pyautogui.click()
-    time.sleep(10)
+    time.sleep(15)
     os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
     downloaded_csv_path = f'C:\\Users\\Александр\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
     with open(downloaded_csv_path, 'r') as csv_file:

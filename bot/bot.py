@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
+
 def connect_db():
     return psycopg2.connect(
         dbname=data['dbname'],
@@ -28,6 +29,7 @@ def connect_db():
         host=data['host'],
         port=data['port']
     )
+
 
 class Form(StatesGroup):
     currency_name = State()
@@ -51,14 +53,12 @@ async def process_currency_name(message: types.Message, state: FSMContext):
 @dp.message(Form.amount_filter)
 async def process_amount_filter(message: types.Message, state: FSMContext):
     try:
-        data = await state.get_data()
         currency_name = data['currency_name']
-        amount_filter = int(message.text) if message.text else None
+        amount_filter = int(message.text) if message.text != 0 else 0
     except ValueError:
         await message.answer("Некорректный формат фильтра. Попробуйте снова.")
         return await state.set_state(Form.amount_filter)
     await get_holders(currency_name, amount_filter)
-
 
     filename = f"{currency_name}_transactions_{amount_filter}.csv" if amount_filter else f"{currency_name}_transactions.csv"
     with open(filename, 'w', newline='') as csvfile:
@@ -86,7 +86,5 @@ async def confirm_filter(callback_query: types.CallbackQuery, state: FSMContext)
 
 
 async def main():
+    print(123)
     await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
