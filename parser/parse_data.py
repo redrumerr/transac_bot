@@ -24,7 +24,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000):
     pyautogui.click()
     time.sleep(15)
     # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
-    downloaded_csv_path = f'C:\\Users\\Александр\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
+    downloaded_csv_path = f'C:\\Users\\alexp\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
     with open(downloaded_csv_path, 'r') as csv_file:
         fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
         reader = csv.DictReader(csv_file, fieldnames)
