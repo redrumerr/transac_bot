@@ -16,16 +16,14 @@ pyautogui.FAILSAFE = True
 async def get_holders(token_name: str, lower_limit: int = 5000):
     current_price, token_address = await get_current_price(token_name)
     lower_limit /= current_price
-    # webbrowser.register('Firefox', None,
-                      #  webbrowser.BackgroundBrowser('C:\\Program Files\\Mozilla Firefox\\firefox.exe'))
     webbrowser.open(url, new=0)
-    pyautogui.moveTo(668, 1042, 4)  # наводимся на строку ввода токена
+    pyautogui.moveTo(668, 527, 4)  # наводимся на строку ввода токена
     pyautogui.click()
     pyautogui.write(token_address)  # вводим адрес токена
-    pyautogui.moveTo(668, 1558, 3)  # наводимся на загрузку csv
+    pyautogui.moveTo(574, 787, 3)  # наводимся на загрузку csv
     pyautogui.click()
     time.sleep(15)
-    os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
+    # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
     downloaded_csv_path = f'C:\\Users\\Александр\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
     with open(downloaded_csv_path, 'r') as csv_file:
         fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
