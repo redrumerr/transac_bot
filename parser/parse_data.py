@@ -7,6 +7,7 @@ import csv
 import json
 import time
 from parser.cookies_headers_urls import cookies_price, headers_price, url
+from parser.get_download_path import get_downloads_path
 from bs4 import BeautifulSoup
 import re
 
@@ -24,18 +25,24 @@ async def get_holders(token_name: str, lower_limit: int = 5000):
     pyautogui.click()
     time.sleep(15)
     # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
-    downloaded_csv_path = f'C:\\Users\\alexp\\Downloads\\export-tokenholders-for-contract-{token_address}.csv'
-    with open(downloaded_csv_path, 'r') as csv_file:
-        fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
-        reader = csv.DictReader(csv_file, fieldnames)
-        for row in reader:
-            try:
-                if float(''.join(row['Balance'].split(','))) >= lower_limit:
-                    print(row)
-            except ValueError:
-                pass
-    time.sleep(3)
-    os.remove(downloaded_csv_path)
+    downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
+    try:
+        with open(downloaded_csv_path, 'r') as csv_file:
+            fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
+            reader = csv.DictReader(csv_file, fieldnames)
+            for row in reader:
+                try:
+                    if float(''.join(row['Balance'].split(','))) >= lower_limit:
+                        print(row)
+                except ValueError:
+                    pass
+        return downloaded_csv_path
+    except FileNotFoundError:
+        print("Файл не найден")
+        return None
+    except Exception as e:
+        print(f'{e}')
+
 
 
 async def get_current_price(token_name: str):  # token_name вводится Михой
