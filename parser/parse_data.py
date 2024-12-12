@@ -14,14 +14,16 @@ import re
 pyautogui.FAILSAFE = True
 
 
-async def get_holders(token_name: str, lower_limit: int = 5000):
+async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int = 9999999999):
     current_price, token_address = await get_current_price(token_name)
+    sent_csv_path = f'{get_downloads_path()}\\{token_name}_filter_{lower_limit}-{upper_limit}.csv'
     lower_limit /= current_price
+    upper_limit /= current_price
     webbrowser.open(url, new=0)
-    pyautogui.moveTo(668, 527, 4)  # наводимся на строку ввода токена
+    pyautogui.moveTo(668, 527, 4)  # наводимся на строку ввода токена ||| разрешение сани мак 668, 1042
     pyautogui.click()
     pyautogui.write(token_address)  # вводим адрес токена
-    pyautogui.moveTo(574, 787, 3)  # наводимся на загрузку csv
+    pyautogui.moveTo(574, 787, 3)  # наводимся на загрузку csv ||| разрешение сани мак 668, 1558
     pyautogui.click()
     time.sleep(15)
     # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
@@ -30,19 +32,23 @@ async def get_holders(token_name: str, lower_limit: int = 5000):
         with open(downloaded_csv_path, 'r') as csv_file:
             fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
             reader = csv.DictReader(csv_file, fieldnames)
-            for row in reader:
-                try:
-                    if float(''.join(row['Balance'].split(','))) >= lower_limit:
-                        print(row)
-                except ValueError:
-                    pass
-        return downloaded_csv_path
+            with open(sent_csv_path, 'w', newline='', encoding='cp1251') as file:
+                writer = csv.writer(file)
+                field = ['Адрес владельца', 'Количество']
+                writer.writerow(field)
+                for row in reader:
+                    try:
+                        if float(''.join(row['Balance'].split(','))) >= lower_limit:
+                            writer.writerow([row['HolderAddress'], row['Balance']])
+                    except ValueError:
+                        pass
+        os.remove(downloaded_csv_path)
+        return sent_csv_path
     except FileNotFoundError:
         print("Файл не найден")
         return None
     except Exception as e:
-        print(f'{e}')
-
+        print(e)
 
 
 async def get_current_price(token_name: str):  # token_name вводится Михой
