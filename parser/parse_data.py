@@ -10,7 +10,6 @@ from parser.cookies_headers_urls import cookies_price, headers_price, url, cooki
 from parser.get_download_path import get_downloads_path
 from bs4 import BeautifulSoup
 import re
-import win32api
 
 pyautogui.FAILSAFE = True
 
@@ -20,12 +19,11 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     sent_csv_path = f'{get_downloads_path()}\\{token_name}_filter_{lower_limit}-{upper_limit}.csv'
     lower_limit /= current_price
     upper_limit /= current_price
-    win32api.LoadKeyboardLayout("00000419", 2)
     webbrowser.open(url, new=0)
-    pyautogui.moveTo(668, 1042, 4)  # наводимся на строку ввода токена ||| разрешение сани мак 668, 1042 ||| 668, 527
+    pyautogui.moveTo(668, 527, 4)  # наводимся на строку ввода токена ||| разрешение сани мак 668, 1042 ||| 668, 527
     pyautogui.click()
     pyautogui.write(token_address, 0.1)  # вводим адрес токена
-    pyautogui.moveTo(668, 1558, 3)  # наводимся на загрузку csv ||| разрешение сани мак 668, 1558 ||| 574, 787
+    pyautogui.moveTo(574, 787, 3)  # наводимся на загрузку csv ||| разрешение сани мак 668, 1558 ||| 574, 787
     pyautogui.click()
     time.sleep(15)
     # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер

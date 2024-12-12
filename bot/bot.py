@@ -118,7 +118,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
 @dp.callback_query(lambda c: c.data == "cancel")
 async def process_cancel(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await bot.send_message(callback_query.from_user.id, 'Напишите цену в долларах для фильтра, например: 5000-20000')
+    await bot.send_message(callback_query.from_user.id, 'Напишите цену в долларах для фильтра,'
+                                                        '\ например: 5000-20000 или просто 5000')
     return await state.set_state(Form.amount_filter)
 
 
