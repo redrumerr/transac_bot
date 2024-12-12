@@ -41,15 +41,16 @@ class Form(StatesGroup):
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
-    await message.answer("Введите название криптовалюты (например, Bitcoin):")
+    await message.answer("Введите название или адрес криптовалюты"
+                         " (например, Bitcoin или 0xF629...a3B9c):")
     await state.set_state(Form.currency_name)
 
 
 @dp.message(Form.currency_name)
 async def process_currency_name(message: types.Message, state: FSMContext):
-    currency_name = message.text.strip()
+    currency_name = message.text.strip().replace(' ', '-')
     await state.update_data(currency_name=currency_name)
-    await message.answer("Напишите цену в долларах для фильтра, например: 5000-20000")
+    await message.answer("Напишите цену в долларах для фильтра, например: 5000-20000 или просто 5000")
     await state.set_state(Form.amount_filter)
 
 
@@ -58,9 +59,15 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
     try:
         state_data = await state.get_data()
         currency_name = state_data['currency_name']
-        amount_filter_low, amount_filter_up = list(map(int, message.text.split('-'))) if message.text else [None, None]
+        amount_filter_low, amount_filter_up = (None, None)
+        if message.text:
+            if '-' in message.text:
+                amount_filter_low, amount_filter_up = list(map(int, message.text.strip().split('-')))
+            else:
+                amount_filter_low, amount_filter_up = (int(message.text.strip()), 99999999)
     except ValueError:
-        await message.answer("Некорректный формат фильтра. Попробуйте снова.")
+        await message.answer("Некорректный формат фильтра."
+                             " Напишите цену в долларах, например: 5000-20000 или просто 5000.")
         return await state.set_state(Form.amount_filter)
 
     sent_csv_path = f'{get_downloads_path()}\\{currency_name}_filter_{amount_filter_low}-{amount_filter_up}.csv'

@@ -1,4 +1,3 @@
-
 cookies_price = {
     'cmc-language': 'en',
     'sensorsdata2015jssdkcross': '%7B%22distinct_id%22%3A%221934b762a1a245-0dbdc525034d0b8-f575722-1296000-1934b762a1b9f0%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E8%87%AA%E7%84%B6%E6%90%9C%E7%B4%A2%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC%22%2C%22%24latest_referrer%22%3A%22https%3A%2F%2Fwww.google.com%2F%22%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMTkzNGI3NjJhMWEyNDUtMGRiZGM1MjUwMzRkMGI4LWY1NzU3MjItMTI5NjAwMC0xOTM0Yjc2MmExYjlmMCJ9%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%22%2C%22value%22%3A%22%22%7D%2C%22%24device_id%22%3A%221934b762a1a245-0dbdc525034d0b8-f575722-1296000-1934b762a1b9f0%22%7D',
@@ -32,32 +31,37 @@ headers_price = {
     'Priority': 'u=0, i',
 }
 
+cookies_eth = {
+    '_ga_T1JC9RNQXV': 'GS1.1.1734009706.32.1.1734009834.59.0.0',
+    '_ga': 'GA1.2.1342471600.1731936902',
+    'etherscan_offset_datetime': '+3',
+    'etherscan_switch_token_amount_value': 'value',
+    'etherscan_cookieconsent': 'True',
+    '__stripe_mid': '1ac66f79-778e-48b0-a811-0c783b6a0b4ef03b00',
+    'etherscan_pwd': '4792:Qdxb:GIMWjul3i0wz9bbzpI1V0BDudmSr9CyxqE/21l0E0Zo=',
+    'etherscan_userid': 'Melpops',
+    'etherscan_autologin': 'True',
+    'ASP.NET_SessionId': 'daistpkk0bxwkagym2yhn2uc',
+    '__cflb': '0H28vPcoRrcznZcNZSuFrvaNdHwh858CcTiYKiNLxBW',
+    '_gid': 'GA1.2.95685380.1734009714',
+    'cf_clearance': 'mUGI2UWwhggBEI9clDuVgj81c4ajOZiAW1RwjK7qS0A-1734009715-1.2.1.1-W7oorLbeMEvRIPNx4KtpRwbdLy0KLP62wo_v4gArC8UQdMd.EKBQvyR6zSv_TgNRzZv8ZMNDx540Nr4Xwpzgb1mYBVrDElP8YdlYtYDY7ilGLBwoi4r1L_mVkSlndT06.KdMfXH8XtN5Q1Ny4B1adpI.i0S_Iv4v74Xzxuru7QrIMgOwRqvJOyTrVSAO6GBlHY63XNAiRNLo0d9CC.TKyVkeU54PTka5ArsmlZQxj1YfG4mSl_WyMNz9sBl16_JcitwO8n5D52OfvvasAkKRge2sK5UiS0uUNf0spj7E.O11v93HjaQYAP5hN4yTmvJb_ep4Ru0ML6XTVnI.iqZpxw',
+    '_gat_gtag_UA_46998878_6': '1',
+}
 
-def get_cookies_etherscan():
-    global cookies
-    print('Getting cookies...')
-
-    options = webdriver.ChromeOptions()
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_experimental_option('excludeSwitches', ['enable-automation'])
-
-    driver = webdriver.Chrome(options=options)
-
-    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-        'source': '''
-        delete window.cdc_adoQpoasnfa76pfcZLmcfl_Array;
-        delete window.cdc_adoQpoasnfa76pfcZLmcfl_Promise;
-        delete window.cdc_adoQpoasnfa76pfcZLmcfl_Symbol;
-        '''
-    })
-
-    cookie_handler = CookieHandler(driver,
-                                   "https://etherscan.io/",
-                                   overwrite=True, filename="get-stocks", wait_time=10)
-    saved_cookies = cookie_handler.save_cookies()
-
-    for e in saved_cookies:
-        cookies[e['name']] = e['value']
-    for e in cookies.keys():
-        print(e, cookies[e])
-
+headers_eth = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+    # 'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Referer': 'https://etherscan.io/',
+    'Connection': 'keep-alive',
+    # 'Cookie': '_ga_T1JC9RNQXV=GS1.1.1734009706.32.1.1734009834.59.0.0; _ga=GA1.2.1342471600.1731936902; etherscan_offset_datetime=+3; etherscan_switch_token_amount_value=value; etherscan_cookieconsent=True; __stripe_mid=1ac66f79-778e-48b0-a811-0c783b6a0b4ef03b00; etherscan_pwd=4792:Qdxb:GIMWjul3i0wz9bbzpI1V0BDudmSr9CyxqE/21l0E0Zo=; etherscan_userid=Melpops; etherscan_autologin=True; ASP.NET_SessionId=daistpkk0bxwkagym2yhn2uc; __cflb=0H28vPcoRrcznZcNZSuFrvaNdHwh858CcTiYKiNLxBW; _gid=GA1.2.95685380.1734009714; cf_clearance=mUGI2UWwhggBEI9clDuVgj81c4ajOZiAW1RwjK7qS0A-1734009715-1.2.1.1-W7oorLbeMEvRIPNx4KtpRwbdLy0KLP62wo_v4gArC8UQdMd.EKBQvyR6zSv_TgNRzZv8ZMNDx540Nr4Xwpzgb1mYBVrDElP8YdlYtYDY7ilGLBwoi4r1L_mVkSlndT06.KdMfXH8XtN5Q1Ny4B1adpI.i0S_Iv4v74Xzxuru7QrIMgOwRqvJOyTrVSAO6GBlHY63XNAiRNLo0d9CC.TKyVkeU54PTka5ArsmlZQxj1YfG4mSl_WyMNz9sBl16_JcitwO8n5D52OfvvasAkKRge2sK5UiS0uUNf0spj7E.O11v93HjaQYAP5hN4yTmvJb_ep4Ru0ML6XTVnI.iqZpxw; _gat_gtag_UA_46998878_6=1',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+    'Sec-Fetch-User': '?1',
+    'Priority': 'u=0, i',
+    # Requests doesn't support trailers
+    # 'TE': 'trailers',
+}
