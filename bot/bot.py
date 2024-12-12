@@ -60,7 +60,7 @@ async def start_command(message: types.Message, state: FSMContext):
 async def in_development(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка кнопок, находящихся в разработке."""
     if callback_query.data == "holders":
-        await handle_holders(callback_query, state)  # Передаём state
+        await handle_holders(callback_query, state)
     elif callback_query.data == "transactions":
         await callback_query.answer("Функция в разработке.", show_alert=True)
     else:
@@ -69,7 +69,7 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка кнопки 'Владельцы'."""
-    await callback_query.answer()  # Закрываем всплывающее уведомление
+    await callback_query.answer()
     await callback_query.message.answer(
         "Введите название или адрес криптовалюты (например, Bitcoin или 0xF629...a3B9c):",
         reply_markup=types.ReplyKeyboardRemove()
