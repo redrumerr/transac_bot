@@ -19,14 +19,20 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     sent_csv_path = f'{get_downloads_path()}\\{token_name}_filter_{lower_limit}-{upper_limit}.csv'
     lower_limit /= current_price
     upper_limit /= current_price
-    webbrowser.open(url, new=0)
-    pyautogui.moveTo(668, 527, 4)  # наводимся на строку ввода токена ||| разрешение сани мак 668, 1042 ||| 668, 527
+    pyautogui.moveTo(1023, 761)
+    webbrowser.register('Opera', None,
+                        webbrowser.BackgroundBrowser(
+                            'C:\\Users\\Александр\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+    webbrowser.get('Opera').open(url, new=0)
+    pyautogui.moveTo(143, 603,
+                     4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 527 ||| fullpizdec: 146, 603
     pyautogui.click()
-    pyautogui.write(token_address, 0.1)  # вводим адрес токена
-    pyautogui.moveTo(574, 787, 3)  # наводимся на загрузку csv ||| разрешение сани мак 668, 1558 ||| 574, 787
+    pyautogui.write(token_address, 0.05)  # вводим адрес токена
+    pyautogui.scroll(-315)
+    pyautogui.sleep(1)
     pyautogui.click()
-    time.sleep(15)
-    # os.system("taskkill /f /im firefox.exe")  # прописать под используемый браузер
+    time.sleep(5)
+    os.system("taskkill /f /im opera.exe")  # прописать под используемый браузер
     downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
     try:
         with open(downloaded_csv_path, 'r') as csv_file:
@@ -38,7 +44,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
                 writer.writerow(field)
                 for row in reader:
                     try:
-                        if float(''.join(row['Balance'].split(','))) >= lower_limit:
+                        if lower_limit <= float(''.join(row['Balance'].split(','))) <= upper_limit:
                             writer.writerow([row['HolderAddress'], row['Balance']])
                     except ValueError:
                         pass

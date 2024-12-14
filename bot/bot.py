@@ -22,6 +22,7 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
+
 def connect_db():
     return psycopg2.connect(
         dbname=data['dbname'],
@@ -31,9 +32,11 @@ def connect_db():
         port=data['port']
     )
 
+
 class Form(StatesGroup):
     currency_name = State()
     amount_filter = State()
+
 
 def main_menu_keyboard():
     """Клавиатура для главного меню."""
@@ -46,15 +49,18 @@ def main_menu_keyboard():
     )
     return inline_keyboard
 
+
 async def show_main_menu(message: types.Message):
     """Отображаем меню пользователю."""
     await message.answer("Выберите действие:", reply_markup=main_menu_keyboard())
+
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     """Команда /start - показывает меню при запуске."""
     await show_main_menu(message)
     await state.clear()
+
 
 @dp.callback_query(lambda c: c.data in ["transactions", "holders", "instructions"])
 async def in_development(callback_query: types.CallbackQuery, state: FSMContext):
@@ -66,6 +72,7 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
     else:
         await callback_query.answer("Функция в разработке.", show_alert=True)
 
+
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка кнопки 'Владельцы'."""
@@ -76,6 +83,7 @@ async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext)
     )
     await state.set_state(Form.currency_name)
 
+
 @dp.message(Form.currency_name)
 async def process_currency_name(message: types.Message, state: FSMContext):
     """Шаг: Получаем название криптовалюты и переходим к следующему этапу."""
@@ -83,6 +91,7 @@ async def process_currency_name(message: types.Message, state: FSMContext):
     await state.update_data(currency_name=currency_name)
     await message.answer("Напишите цену в долларах для фильтра, например: 5000-20000 или просто 5000")
     await state.set_state(Form.amount_filter)
+
 
 @dp.message(Form.amount_filter)
 async def process_amount_filter(message: types.Message, state: FSMContext):
@@ -114,6 +123,7 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
     )
     await message.answer("Подтвердите фильтр:", reply_markup=confirm_markup)
 
+
 @dp.callback_query(lambda c: c.data == "confirm")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
     """Подтверждение фильтра и отправка данных."""
@@ -124,8 +134,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
 
     try:
         await get_holders(
-            state_data['currency_name'], 
-            state_data['amount_filter_low'], 
+            state_data['currency_name'],
+            state_data['amount_filter_low'],
             state_data['amount_filter_up']
         )
         input_file = FSInputFile(file_path)
@@ -146,11 +156,13 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
         logging.exception(e)
         await callback_query.answer(f"Ошибка: {e}", show_alert=True)
 
+
 @dp.message(lambda message: message.text == "Вернуться к меню")
 async def return_to_main_menu(message: types.Message, state: FSMContext):
     """Возврат в главное меню."""
     await show_main_menu(message)
     await state.clear()
+
 
 @dp.callback_query(lambda c: c.data == "cancel")
 async def cancel_filter(callback_query: types.CallbackQuery, state: FSMContext):
@@ -160,6 +172,7 @@ async def cancel_filter(callback_query: types.CallbackQuery, state: FSMContext):
         "Введите цену в долларах для фильтра, например: 5000-20000 или просто 5000"
     )
     await state.set_state(Form.amount_filter)
+
 
 async def main():
     """Основной цикл запуска бота."""
