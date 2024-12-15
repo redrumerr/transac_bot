@@ -22,7 +22,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     pyautogui.moveTo(1918, 200)
     webbrowser.register('Opera', None,
                         webbrowser.BackgroundBrowser(
-                            'C:\\Users\\Александр\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+                            'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\opera.exe'))
     webbrowser.get('Opera').open(url, new=0)
     pyautogui.moveTo(668, 761,
                      4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603
@@ -31,7 +31,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     pyautogui.scroll(-315)
     pyautogui.sleep(1)
     pyautogui.click()
-    time.sleep(5)
+    time.sleep(10)
     os.system("taskkill /f /im opera.exe")
     downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
     try:
