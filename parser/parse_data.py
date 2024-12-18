@@ -22,7 +22,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     pyautogui.moveTo(1918, 200)
     webbrowser.register('Opera', None,
                         webbrowser.BackgroundBrowser(
-                            'C:\\Users\\Александр\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+                            'C:\\Users\\admin\\AppData\\Local\\Programs\\Opera'))
     webbrowser.get('Opera').open(url, new=0)
     pyautogui.moveTo(668, 761,
                      4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603

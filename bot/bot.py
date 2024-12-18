@@ -10,7 +10,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, InputFile
 
 with open('secrets.json', 'r') as f:
     data = json.load(f)
@@ -21,16 +21,6 @@ logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
-
-
-def connect_db():
-    return psycopg2.connect(
-        dbname=data['dbname'],
-        user=data['user'],
-        password=data['password'],
-        host=data['host'],
-        port=data['port']
-    )
 
 
 class Form(StatesGroup):
@@ -67,11 +57,77 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
     """Обработка кнопок, находящихся в разработке."""
     if callback_query.data == "holders":
         await handle_holders(callback_query, state)
+    elif callback_query.data == "instructions":
+        await instructions(callback_query)
     elif callback_query.data == "transactions":
         await callback_query.answer("Функция в разработке.", show_alert=True)
-    else:
-        await callback_query.answer("Функция в разработке.", show_alert=True)
+              
+def instructions_keyboard():
+    """Меню инструкции."""
+    inline_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual"),
+             InlineKeyboardButton(text="Видео-гайд", callback_data="video"),
+             InlineKeyboardButton(text="Как разбить текст по столбцам в Excel", callback_data="excel")]
+        ]
+    )
+    return inline_keyboard
 
+@dp.callback_query(lambda c: c.data == "instructions")
+async def instructions(callback_query: types.CallbackQuery):
+    """Отправка инструкции."""
+    await bot.send_message(
+        callback_query.message.chat.id,
+        "Выберите раздел инструкции",
+        reply_markup=instructions_keyboard()
+    )
+@dp.callback_query(lambda c: c.data == "manual")
+async def manual(callback_query: types.CallbackQuery):
+    """Отправка руководства по использованию."""
+    manual_text = """
+    Руководство по использованию:
+    1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
+    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
+    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
+    4. Подтвердите введенные вами фильтры.
+    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
+    """
+    await bot.send_message(
+        callback_query.message.chat.id,
+        manual_text,
+        reply_markup=main_menu_keyboard()
+    )
+@dp.callback_query(lambda c: c.data == "video")
+async def video(callback_query: types.CallbackQuery):
+    """Отправка видео-гайда."""
+    video_url = "https://www.youtube.com/shorts/yKS1yCk-aNs"  
+    await bot.send_video(
+        callback_query.message.chat.id,
+        video_url,
+        reply_markup=main_menu_keyboard()
+    )
+@dp.callback_query(lambda c: c.data == "excel")
+async def excel(callback_query: types.CallbackQuery):
+    """Отправка инструкции по разбиению текста по столбцам в Excel."""
+    images = [
+        "bot/1.jpg", 
+        "bot/2.jpg",
+        "bot/3.jpg",
+        "bot/4.jpg",
+        "bot/5.jpg",
+    ]
+    for image in images:
+        input_file = FSInputFile(image, filename=os.path.basename(image))
+        await bot.send_photo(
+            callback_query.message.chat.id,
+            photo=input_file,
+            caption="Шаг {}".format(images.index(image) + 1)
+        )
+    await bot.send_message(
+        callback_query.message.chat.id,
+        "Готово!",
+        reply_markup=main_menu_keyboard()
+    )
 
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
