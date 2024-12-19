@@ -22,14 +22,6 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-def connect_db():
-    return psycopg2.connect(
-        dbname=data['dbname'],
-        user=data['user'],
-        password=data['password'],
-        host=data['host'],
-        port=data['port']
-    )
 
 class Form(StatesGroup):
     crypto_count = State()
@@ -63,10 +55,78 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
     """Обработка кнопок, находящихся в разработке."""
     if callback_query.data == "holders":
         await handle_holders(callback_query, state)
+    elif callback_query.data == "instructions":
+        await instructions(callback_query)
     elif callback_query.data == "transactions":
         await callback_query.answer("Функция в разработке.", show_alert=True)
-    else:
-        await callback_query.answer("Функция в разработке.", show_alert=True)
+
+def instructions_keyboard():
+    """Меню инструкции."""
+    inline_keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual"),
+             InlineKeyboardButton(text="Видео-гайд", callback_data="video"),
+             InlineKeyboardButton(text="Как разбить текст по столбцам в Excel", callback_data="excel")]
+        ]
+    )
+    return inline_keyboard
+
+@dp.callback_query(lambda c: c.data == "instructions")
+async def instructions(callback_query: types.CallbackQuery):
+    """Отправка инструкции."""
+    await bot.send_message(
+        callback_query.message.chat.id,
+        "Выберите раздел инструкции",
+        reply_markup=instructions_keyboard()
+    )
+@dp.callback_query(lambda c: c.data == "manual")
+async def manual(callback_query: types.CallbackQuery):
+    """Отправка руководства по использованию."""
+    manual_text = """
+    Руководство по использованию:
+    1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
+    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
+    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
+    4. Подтвердите введенные вами фильтры.
+    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
+    """
+    await bot.send_message(
+        callback_query.message.chat.id,
+        manual_text,
+        reply_markup=main_menu_keyboard()
+    )
+
+@dp.callback_query(lambda c: c.data == "video")
+async def video(callback_query: types.CallbackQuery):
+    """Отправка видео-гайда.""" 
+    await bot.send_message(
+        callback_query.message.chat.id,
+        "Видео-гайд доступен по следующей ссылке: https://www.youtube.com/shorts/yKS1yCk-aNs",
+        reply_markup=main_menu_keyboard()
+    )
+
+@dp.callback_query(lambda c: c.data == "excel")
+async def excel(callback_query: types.CallbackQuery):
+    """Отправка инструкции по разбиению текста по столбцам в Excel."""
+    images = [
+        "bot/1.jpg", 
+        "bot/2.jpg",
+        "bot/3.jpg",
+        "bot/4.jpg",
+        "bot/5.jpg",
+    ]
+    for image in images:
+        input_file = FSInputFile(image, filename=os.path.basename(image))
+        await bot.send_photo(
+            callback_query.message.chat.id,
+            photo=input_file,
+            caption="Шаг {}".format(images.index(image) + 1)
+        )
+    await bot.send_message(
+        callback_query.message.chat.id,
+        "Готово!",
+        reply_markup=main_menu_keyboard()
+    )
 
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
@@ -148,14 +208,13 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
             "Некорректный формат фильтра. Напишите цену в долларах, например: 5000-20000 или просто 5000."
         )
 
+
 @dp.callback_query(lambda c: c.data == "confirm")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
-    """Подтверждение фильтров и обработка данных."""
-    # Удаляем сообщение подтверждения
+    """Подтверждение фильтров и последовательная обработка криптовалют."""
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-
-    # Получаем все данные пользователя
     await callback_query.answer('В процессе...')
+
     data = await state.get_data()
     crypto_data = data.get("crypto_data", [])
 
@@ -165,20 +224,28 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             amount_filter_low = crypto["amount_filter_low"]
             amount_filter_up = crypto["amount_filter_up"]
 
-            file_path = f"{get_downloads_path()}\\{currency_name}_filter_{amount_filter_low}-{amount_filter_up}.csv"
-            await get_holders(currency_name, amount_filter_low, amount_filter_up)
-            input_file = FSInputFile(file_path)
-            await bot.send_document(callback_query.from_user.id, input_file)
-            os.remove(file_path)
+            file_path = await get_holders(currency_name, amount_filter_low, amount_filter_up)
+
+            if file_path:
+                input_file = FSInputFile(file_path)
+                await bot.send_document(callback_query.from_user.id, input_file)
+                os.remove(file_path)
         except Exception as e:
             logging.exception(e)
             await callback_query.message.answer(f"Ошибка обработки {crypto['currency_name']}: {e}")
 
-    # Возвращаем пользователя в главное меню
     await callback_query.message.answer(
         "Все файлы отправлены! Возвращаемся в главное меню...",
         reply_markup=types.ReplyKeyboardRemove()
     )
+    await show_main_menu(callback_query.message)
+    await state.clear()
+
+@dp.callback_query(lambda c: c.data == "cancel")
+async def cancel_operation(callback_query: types.CallbackQuery, state: FSMContext):
+    """Отмена операции и возврат в главное меню."""
+    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
+    await callback_query.message.answer("Операция отменена. Возвращаемся в главное меню...", reply_markup=types.ReplyKeyboardRemove())
     await show_main_menu(callback_query.message)
     await state.clear()
 

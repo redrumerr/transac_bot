@@ -19,21 +19,28 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     sent_csv_path = f'{get_downloads_path()}\\{token_name}_filter_{lower_limit}-{upper_limit}.csv'
     lower_limit /= current_price
     upper_limit /= current_price
-    pyautogui.moveTo(1918, 200)
-    webbrowser.register('Opera', None,
-                        webbrowser.BackgroundBrowser(
-                            'C:\\Users\\alexp\\AppData\\Local\\Programs\\Opera\\opera.exe'))
-    webbrowser.get('Opera').open(url, new=0)
-    pyautogui.moveTo(587, 486,
-                     4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486
-    pyautogui.click()
-    pyautogui.write(token_address, 0.05)  # вводим адрес токена
-    pyautogui.scroll(-315)
-    pyautogui.sleep(1)
-    pyautogui.click()
-    time.sleep(10)
-    os.system("taskkill /f /im opera.exe")
-    downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
+    
+    while True:
+        try:
+            pyautogui.moveTo(1918, 200)
+            webbrowser.register('Opera', None,
+                                webbrowser.BackgroundBrowser(
+                                    'C:\\Users\\alexp\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+            webbrowser.get('Opera').open(url, new=0)
+            pyautogui.moveTo(587, 486, 4)
+            pyautogui.click()
+            pyautogui.write(token_address, 0.05)
+            pyautogui.scroll(-315)
+            pyautogui.sleep(1)
+            pyautogui.click()
+            time.sleep(25)
+            os.system("taskkill /f /im opera.exe")
+            break
+        except Exception as e:
+            print(f"Error: {e}, retrying...")
+            time.sleep(5)
+
+    downloaded_csv_path = f'{get_downloads_path()}\\export-tokenholders-for-contract-{token_address}.csv'
     try:
         with open(downloaded_csv_path, 'r') as csv_file:
             fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
@@ -56,10 +63,8 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     except Exception as e:
         print(e)
 
-
-async def get_current_price(token_name: str):  # token_name вводится Михой
+async def get_current_price(token_name: str):
     response = requests.get(f'https://coinmarketcap.com/currencies/{token_name.lower()}/',
-                            # Находим страницу нужной криптовалюты на CoinMarketCap
                             cookies=cookies_price, headers=headers_price)
     soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -74,6 +79,5 @@ async def get_current_price(token_name: str):  # token_name вводится М�
         token_address = token_name.lower()
         return price, token_address
 
-    price = float(re.findall('\$[\d.]+', str(soup.find_all('span', class_='sc-65e7f566-0 WXGwg base-text')[0]))[0][
-                  1:])  # Находим цену на странице и преобразуем её
+    price = float(re.findall('\$[\d.]+', str(soup.find_all('span', class_='sc-65e7f566-0 WXGwg base-text')[0]))[0][1:])
     return price, token_address
