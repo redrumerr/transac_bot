@@ -5,12 +5,15 @@ import psycopg2
 import asyncio
 import json
 import os
+import glob
+import pandas as pd
 from parser.parse_data import get_holders, get_downloads_path
 from aiogram import Bot, Dispatcher, types
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from openpyxl import Workbook
 
 with open('secrets.json', 'r') as f:
     data = json.load(f)
@@ -29,6 +32,7 @@ class Form(StatesGroup):
     amount_filter = State()
     confirmation = State()
 
+
 def main_menu_keyboard():
     """Клавиатура для главного меню."""
     inline_keyboard = InlineKeyboardMarkup(
@@ -40,15 +44,18 @@ def main_menu_keyboard():
     )
     return inline_keyboard
 
+
 async def show_main_menu(message: types.Message):
     """Отображаем меню пользователю."""
     await message.answer("Выберите действие:", reply_markup=main_menu_keyboard())
+
 
 @dp.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     """Команда /start - показывает меню при запуске."""
     await show_main_menu(message)
     await state.clear()
+
 
 @dp.callback_query(lambda c: c.data in ["transactions", "holders", "instructions"])
 async def in_development(callback_query: types.CallbackQuery, state: FSMContext):
@@ -59,6 +66,7 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
         await instructions(callback_query)
     elif callback_query.data == "transactions":
         await callback_query.answer("Функция в разработке.", show_alert=True)
+
 
 def instructions_keyboard():
     """Меню инструкции."""
@@ -71,6 +79,7 @@ def instructions_keyboard():
     )
     return inline_keyboard
 
+
 @dp.callback_query(lambda c: c.data == "instructions")
 async def instructions(callback_query: types.CallbackQuery):
     """Отправка инструкции."""
@@ -79,6 +88,8 @@ async def instructions(callback_query: types.CallbackQuery):
         "Выберите раздел инструкции",
         reply_markup=instructions_keyboard()
     )
+
+
 @dp.callback_query(lambda c: c.data == "manual")
 async def manual(callback_query: types.CallbackQuery):
     """Отправка руководства по использованию."""
@@ -96,6 +107,7 @@ async def manual(callback_query: types.CallbackQuery):
         reply_markup=main_menu_keyboard()
     )
 
+
 @dp.callback_query(lambda c: c.data == "video")
 async def video(callback_query: types.CallbackQuery):
     """Отправка видео-гайда.""" 
@@ -104,6 +116,7 @@ async def video(callback_query: types.CallbackQuery):
         "Видео-гайд доступен по следующей ссылке: https://www.youtube.com/shorts/yKS1yCk-aNs",
         reply_markup=main_menu_keyboard()
     )
+
 
 @dp.callback_query(lambda c: c.data == "excel")
 async def excel(callback_query: types.CallbackQuery):
@@ -128,6 +141,7 @@ async def excel(callback_query: types.CallbackQuery):
         reply_markup=main_menu_keyboard()
     )
 
+
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
     """Обработка кнопки 'Владельцы'."""
@@ -137,6 +151,7 @@ async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext)
         reply_markup=types.ReplyKeyboardRemove()
     )
     await state.set_state(Form.crypto_count)
+
 
 @dp.message(Form.crypto_count)
 async def process_crypto_count(message: types.Message, state: FSMContext):
@@ -151,6 +166,7 @@ async def process_crypto_count(message: types.Message, state: FSMContext):
     except ValueError:
         await message.answer("Некорректное количество. Пожалуйста, введите положительное целое число.")
 
+
 @dp.message(Form.currency_name)
 async def process_currency_name(message: types.Message, state: FSMContext):
     """Шаг: Получаем название криптовалюты."""
@@ -160,6 +176,7 @@ async def process_currency_name(message: types.Message, state: FSMContext):
     await state.update_data(crypto_data=crypto_data)
     await message.answer("Напишите цену в долларах для фильтра, например: 5000-20000 или просто 5000")
     await state.set_state(Form.amount_filter)
+
 
 @dp.message(Form.amount_filter)
 async def process_amount_filter(message: types.Message, state: FSMContext):
@@ -181,7 +198,7 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
         })
         await state.update_data(crypto_data=crypto_data)
 
-        # Проверяем, закончили ли ввод всех криптовалют
+
         current_index = data.get("current_index", 0) + 1
         crypto_count = data.get("crypto_count", 0)
 
@@ -209,14 +226,60 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
         )
 
 
+async def merge_csv_files(directory, output_filename):
+    """Создает Excel-файл с отдельными листами для каждой криптовалюты."""
+    csv_files = glob.glob(f"{directory}/*.csv")
+    if not csv_files:
+        return None
+
+    output_path = os.path.join(directory, output_filename)
+    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+        sheet_added = False
+        for file in csv_files:
+
+            currency_name = os.path.basename(file).split('_')[0]
+            try:
+                data = pd.read_csv(file, encoding='cp1251')
+
+                if len(data.columns) < 2:
+                    continue
+
+                data.columns = ["Адрес кошелька", "Количество"] + data.columns.tolist()[2:]
+
+                if "PendingBalanceUpdate" in data.columns:
+                    data.drop(columns="PendingBalanceUpdate", inplace=True)
+
+                data["Название криптовалюты"] = currency_name
+                data = data[["Адрес кошелька", "Название криптовалюты", "Количество"]]
+
+
+                data.to_excel(writer, sheet_name=currency_name[:31], index=False)
+                sheet_added = True
+            except Exception as e:
+                print(f"Ошибка обработки файла {file}: {e}")
+
+
+        if not sheet_added:
+
+            wb = Workbook()
+            wb.create_sheet(title="Empty")
+            wb.save(output_path)
+
+
+    for file in csv_files:
+        os.remove(file)
+
+    return output_path
+
 @dp.callback_query(lambda c: c.data == "confirm")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
-    """Подтверждение фильтров и последовательная обработка криптовалют."""
+    """Подтверждение фильтров и объединение файлов."""
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await callback_query.answer('В процессе...')
 
     data = await state.get_data()
     crypto_data = data.get("crypto_data", [])
+    downloads_path = get_downloads_path()
 
     for crypto in crypto_data:
         try:
@@ -224,22 +287,24 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             amount_filter_low = crypto["amount_filter_low"]
             amount_filter_up = crypto["amount_filter_up"]
 
-            file_path = await get_holders(currency_name, amount_filter_low, amount_filter_up)
-
-            if file_path:
-                input_file = FSInputFile(file_path)
-                await bot.send_document(callback_query.from_user.id, input_file)
-                os.remove(file_path)
+            await get_holders(currency_name, amount_filter_low, amount_filter_up)
         except Exception as e:
             logging.exception(e)
             await callback_query.message.answer(f"Ошибка обработки {crypto['currency_name']}: {e}")
 
-    await callback_query.message.answer(
-        "Все файлы отправлены! Возвращаемся в главное меню...",
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+    merged_file_path = await merge_csv_files(downloads_path, "merged_cryptos.xlsx")
+
+    if merged_file_path:
+        input_file = FSInputFile(merged_file_path)
+        await bot.send_document(callback_query.from_user.id, input_file)
+        os.remove(merged_file_path)
+        await callback_query.message.answer("Все данные объединены и отправлены! Возвращаемся в главное меню...", reply_markup=types.ReplyKeyboardRemove())
+    else:
+        await callback_query.message.answer("Не удалось найти файлы для объединения.")
+
     await show_main_menu(callback_query.message)
     await state.clear()
+
 
 @dp.callback_query(lambda c: c.data == "cancel")
 async def cancel_operation(callback_query: types.CallbackQuery, state: FSMContext):
@@ -249,13 +314,6 @@ async def cancel_operation(callback_query: types.CallbackQuery, state: FSMContex
     await show_main_menu(callback_query.message)
     await state.clear()
 
-@dp.callback_query(lambda c: c.data == "cancel")
-async def cancel_operation(callback_query: types.CallbackQuery, state: FSMContext):
-    """Отмена операции и возврат в главное меню."""
-    await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await callback_query.message.answer("Операция отменена. Возвращаемся в главное меню...", reply_markup=types.ReplyKeyboardRemove())
-    await show_main_menu(callback_query.message)
-    await state.clear()
 
 async def main():
     """Основной цикл запуска бота."""

@@ -33,7 +33,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
             pyautogui.scroll(-315)
             pyautogui.sleep(1)
             pyautogui.click()
-            time.sleep(25)
+            time.sleep(10)
             os.system("taskkill /f /im opera.exe")
             break
         except Exception as e:
