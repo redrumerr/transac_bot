@@ -226,50 +226,68 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
         )
 
 
-async def merge_csv_files(directory, output_filename):
-    """Создает Excel-файл с отдельными листами для каждой криптовалюты."""
+async def merge_csv_files(directory, output_filename, required_coins):
+    """Создает Excel-файл с кошельками, у которых есть все заданные монеты."""
     csv_files = glob.glob(f"{directory}/*.csv")
     if not csv_files:
         return None
 
+    # Общий DataFrame для всех данных
+    combined_data = pd.DataFrame()
+
+    for file in csv_files:
+        currency_name = os.path.basename(file).split('_')[0]
+        try:
+            data = pd.read_csv(file, encoding='cp1251')
+
+            if len(data.columns) < 2:
+                continue
+
+            data.columns = ["Адрес кошелька", "Количество"] + data.columns.tolist()[2:]
+
+            if "PendingBalanceUpdate" in data.columns:
+                data.drop(columns="PendingBalanceUpdate", inplace=True)
+
+            data["Название криптовалюты"] = currency_name
+            data = data[["Адрес кошелька", "Название криптовалюты", "Количество"]]
+
+            combined_data = pd.concat([combined_data, data], ignore_index=True)
+        except Exception as e:
+            print(f"Ошибка обработки файла {file}: {e}")
+
+    if combined_data.empty:
+        return None
+
+    # Фильтрация данных: оставляем только кошельки, у которых есть все монеты из списка required_coins
+    wallets_with_all_coins = (
+        combined_data[combined_data["Название криптовалюты"].isin(required_coins)]
+        .groupby("Адрес кошелька")
+        .filter(lambda x: set(required_coins).issubset(set(x["Название криптовалюты"])))
+    )
+
+    if wallets_with_all_coins.empty:
+        return None
+
+    # Группировка по адресу кошелька и сбор данных
+    grouped_data = (
+        wallets_with_all_coins.groupby("Адрес кошелька")
+        .apply(lambda x: {
+            "Адрес кошелька": x["Адрес кошелька"].iloc[0],
+            "Количество": ", ".join(f"{coin}: {amount}" for coin, amount in x.groupby("Название криптовалюты")["Количество"].sum().items())
+        })
+        .apply(pd.Series)
+    )
+
     output_path = os.path.join(directory, output_filename)
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-        sheet_added = False
-        for file in csv_files:
+        grouped_data.to_excel(writer, sheet_name="Совпадения", index=False)
 
-            currency_name = os.path.basename(file).split('_')[0]
-            try:
-                data = pd.read_csv(file, encoding='cp1251')
-
-                if len(data.columns) < 2:
-                    continue
-
-                data.columns = ["Адрес кошелька", "Количество"] + data.columns.tolist()[2:]
-
-                if "PendingBalanceUpdate" in data.columns:
-                    data.drop(columns="PendingBalanceUpdate", inplace=True)
-
-                data["Название криптовалюты"] = currency_name
-                data = data[["Адрес кошелька", "Название криптовалюты", "Количество"]]
-
-
-                data.to_excel(writer, sheet_name=currency_name[:31], index=False)
-                sheet_added = True
-            except Exception as e:
-                print(f"Ошибка обработки файла {file}: {e}")
-
-
-        if not sheet_added:
-
-            wb = Workbook()
-            wb.create_sheet(title="Empty")
-            wb.save(output_path)
-
-
+    # Удаляем исходные CSV-файлы
     for file in csv_files:
         os.remove(file)
 
     return output_path
+
 
 @dp.callback_query(lambda c: c.data == "confirm")
 async def process_confirmation(callback_query: types.CallbackQuery, state: FSMContext):
@@ -279,6 +297,7 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
 
     data = await state.get_data()
     crypto_data = data.get("crypto_data", [])
+    required_coins = [crypto["currency_name"] for crypto in crypto_data]
     downloads_path = get_downloads_path()
 
     for crypto in crypto_data:
@@ -292,7 +311,7 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
             logging.exception(e)
             await callback_query.message.answer(f"Ошибка обработки {crypto['currency_name']}: {e}")
 
-    merged_file_path = await merge_csv_files(downloads_path, "merged_cryptos.xlsx")
+    merged_file_path = await merge_csv_files(downloads_path, "merged_cryptos.xlsx", required_coins)
 
     if merged_file_path:
         input_file = FSInputFile(merged_file_path)

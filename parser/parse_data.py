@@ -27,13 +27,13 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
                                 webbrowser.BackgroundBrowser(
                                     'C:\\Users\\alexp\\AppData\\Local\\Programs\\Opera\\opera.exe'))
             webbrowser.get('Opera').open(url, new=0)
-            pyautogui.moveTo(587, 486, 4)
+            pyautogui.moveTo(489, 692, 4) # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486, 489, 692
             pyautogui.click()
             pyautogui.write(token_address, 0.05)
             pyautogui.scroll(-315)
             pyautogui.sleep(1)
             pyautogui.click()
-            time.sleep(10)
+            time.sleep(30)
             os.system("taskkill /f /im opera.exe")
             break
         except Exception as e:
