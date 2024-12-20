@@ -19,7 +19,7 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
     sent_csv_path = f'{get_downloads_path()}\\{token_name}_filter_{lower_limit}-{upper_limit}.csv'
     lower_limit /= current_price
     upper_limit /= current_price
-    
+
     while True:
         try:
             pyautogui.moveTo(1918, 200)
@@ -41,6 +41,21 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
             time.sleep(5)
 
     downloaded_csv_path = f'{get_downloads_path()}\\export-tokenholders-for-contract-{token_address}.csv'
+    pyautogui.moveTo(1918, 200)
+    webbrowser.register('Opera', None,
+                        webbrowser.BackgroundBrowser(
+                            'C:\\Users\\admin\\AppData\\Local\\Programs\\Opera'))
+    webbrowser.get('Opera').open(url, new=0)
+    pyautogui.moveTo(668, 761,
+                     4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603
+    pyautogui.click()
+    pyautogui.write(token_address, 0.05)  # вводим адрес токена
+    pyautogui.scroll(-315)
+    pyautogui.sleep(1)
+    pyautogui.click()
+    time.sleep(5)
+    os.system("taskkill /f /im opera.exe")
+    downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
     try:
         with open(downloaded_csv_path, 'r') as csv_file:
             fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
