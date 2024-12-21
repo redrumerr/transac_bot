@@ -25,37 +25,22 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
             pyautogui.moveTo(1918, 200)
             webbrowser.register('Opera', None,
                                 webbrowser.BackgroundBrowser(
-                                    'C:\\Users\\alexp\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+                                    'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\opera.exe'))
             webbrowser.get('Opera').open(url, new=0)
-            pyautogui.moveTo(489, 692,
+            pyautogui.moveTo(668, 761,
                              4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486, 489, 692
             pyautogui.click()
             pyautogui.write(token_address, 0.05)
             pyautogui.scroll(-315)
             pyautogui.sleep(1)
             pyautogui.click()
-            time.sleep(30)
+            time.sleep(10)
             os.system("taskkill /f /im opera.exe")
             break
         except Exception as e:
             print(f"Error: {e}, retrying...")
             time.sleep(5)
 
-    pyautogui.moveTo(1918, 200)
-    webbrowser.register('Opera', None,
-                        webbrowser.BackgroundBrowser(
-                            'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\opera.exe'))
-
-    webbrowser.get('Opera').open(url, new=0)
-    pyautogui.moveTo(668, 761,
-                     4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603
-    pyautogui.click()
-    pyautogui.write(token_address, 0.05)  # вводим адрес токена
-    pyautogui.scroll(-315)
-    pyautogui.sleep(1)
-    pyautogui.click()
-    time.sleep(10)
-    os.system("taskkill /f /im opera.exe")
     downloaded_csv_path = f'{get_downloads_path()}\export-tokenholders-for-contract-{token_address}.csv'
     try:
         with open(downloaded_csv_path, 'r') as csv_file:
