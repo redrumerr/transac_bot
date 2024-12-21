@@ -8,7 +8,6 @@ import json
 import time
 from parser.cookies_headers_urls import cookies_price, headers_price, url, cookies_eth, headers_eth
 from parser.get_download_path import get_downloads_path
-from bs4 import BeautifulSoup
 import re
 
 pyautogui.FAILSAFE = True

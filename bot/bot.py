@@ -1,7 +1,6 @@
 import logging
 import csv
 import aiogram.exceptions
-import psycopg2
 import asyncio
 import json
 import os
@@ -14,7 +13,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
 from openpyxl import Workbook
-
 
 with open('secrets.json', 'r') as f:
     data = json.load(f)
@@ -68,14 +66,12 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
     elif callback_query.data == "transactions":
         await callback_query.answer("Функция в разработке.", show_alert=True)
 
-        
+
 def instructions_keyboard():
     """Меню инструкции."""
     inline_keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual"),
-             InlineKeyboardButton(text="Видео-гайд", callback_data="video"),
-             InlineKeyboardButton(text="Как разбить текст по столбцам в Excel", callback_data="excel")]
+            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual")],
         ]
     )
     return inline_keyboard
@@ -97,10 +93,11 @@ async def manual(callback_query: types.CallbackQuery):
     manual_text = """
     Руководство по использованию:
     1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
-    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
-    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
-    4. Подтвердите введенные вами фильтры.
-    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
+    2. Введите количество криптовалют.
+    3. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
+    4. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
+    5. Подтвердите введенные вами фильтры.
+    6. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
     """
     await bot.send_message(
         callback_query.message.chat.id,
@@ -108,96 +105,6 @@ async def manual(callback_query: types.CallbackQuery):
         reply_markup=main_menu_keyboard()
     )
 
-
-@dp.callback_query(lambda c: c.data == "video")
-async def video(callback_query: types.CallbackQuery):
-    """Отправка видео-гайда.""" 
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Видео-гайд доступен по следующей ссылке: https://www.youtube.com/shorts/yKS1yCk-aNs",
-        reply_markup=main_menu_keyboard()
-    )
-
-
-@dp.callback_query(lambda c: c.data == "excel")
-async def excel(callback_query: types.CallbackQuery):
-    """Отправка инструкции по разбиению текста по столбцам в Excel."""
-    images = [
-        "bot/1.jpg", 
-        "bot/2.jpg",
-        "bot/3.jpg",
-        "bot/4.jpg",
-        "bot/5.jpg",
-    ]
-    for image in images:
-        input_file = FSInputFile(image, filename=os.path.basename(image))
-        await bot.send_photo(
-            callback_query.message.chat.id,
-            photo=input_file,
-            caption="Шаг {}".format(images.index(image) + 1)
-        )
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Готово!",
-        reply_markup=main_menu_keyboard()
-    )
-
-
-@dp.callback_query(lambda c: c.data == "instructions")
-async def instructions(callback_query: types.CallbackQuery):
-    """Отправка инструкции."""
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Выберите раздел инструкции",
-        reply_markup=instructions_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "manual")
-async def manual(callback_query: types.CallbackQuery):
-    """Отправка руководства по использованию."""
-    manual_text = """
-    Руководство по использованию:
-    1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
-    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
-    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
-    4. Подтвердите введенные вами фильтры.
-    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
-    """
-    await bot.send_message(
-        callback_query.message.chat.id,
-        manual_text,
-        reply_markup=main_menu_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "video")
-async def video(callback_query: types.CallbackQuery):
-    """Отправка видео-гайда."""
-    video_url = "https://www.youtube.com/shorts/yKS1yCk-aNs"  
-    await bot.send_video(
-        callback_query.message.chat.id,
-        video_url,
-        reply_markup=main_menu_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "excel")
-async def excel(callback_query: types.CallbackQuery):
-    """Отправка инструкции по разбиению текста по столбцам в Excel."""
-    images = [
-        "bot/1.jpg", 
-        "bot/2.jpg",
-        "bot/3.jpg",
-        "bot/4.jpg",
-        "bot/5.jpg",
-    ]
-    for image in images:
-        input_file = FSInputFile(image, filename=os.path.basename(image))
-        await bot.send_photo(
-            callback_query.message.chat.id,
-            photo=input_file,
-            caption="Шаг {}".format(images.index(image) + 1)
-        )
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Готово!",
-        reply_markup=main_menu_keyboard()
-    )
 
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
@@ -227,8 +134,8 @@ async def process_crypto_count(message: types.Message, state: FSMContext):
 @dp.message(Form.currency_name)
 async def process_currency_name(message: types.Message, state: FSMContext):
     """Шаг: Получаем название криптовалюты."""
-    data = await state.get_data()
-    crypto_data = data.get("crypto_data", [])
+    state_data = await state.get_data()
+    crypto_data = state_data.get("crypto_data", [])
     crypto_data.append({"currency_name": message.text.strip()})
     await state.update_data(crypto_data=crypto_data)
     await message.answer("Напишите цену в долларах для фильтра, например: 5000-20000 или просто 5000")
@@ -239,8 +146,8 @@ async def process_currency_name(message: types.Message, state: FSMContext):
 async def process_amount_filter(message: types.Message, state: FSMContext):
     """Шаг: Получаем фильтр для текущей криптовалюты."""
     try:
-        data = await state.get_data()
-        crypto_data = data.get("crypto_data", [])
+        state_data = await state.get_data()
+        crypto_data = state_data.get("crypto_data", [])
         current_crypto = crypto_data[-1]
 
         if '-' in message.text:
@@ -254,7 +161,6 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
             "amount_filter_up": amount_filter_up
         })
         await state.update_data(crypto_data=crypto_data)
-
 
         current_index = data.get("current_index", 0) + 1
         crypto_count = data.get("crypto_count", 0)
@@ -295,20 +201,20 @@ async def merge_csv_files(directory, output_filename, required_coins):
     for file in csv_files:
         currency_name = os.path.basename(file).split('_')[0]
         try:
-            data = pd.read_csv(file, encoding='cp1251')
+            state_data = pd.read_csv(file, encoding='cp1251')
 
-            if len(data.columns) < 2:
+            if len(state_data.columns) < 2:
                 continue
 
-            data.columns = ["Адрес кошелька", "Количество"] + data.columns.tolist()[2:]
+            state_data.columns = ["Адрес кошелька", "Количество"] + state_data.columns.tolist()[2:]
 
-            if "PendingBalanceUpdate" in data.columns:
-                data.drop(columns="PendingBalanceUpdate", inplace=True)
+            if "PendingBalanceUpdate" in state_data.columns:
+                state_data.drop(columns="PendingBalanceUpdate", inplace=True)
 
-            data["Название криптовалюты"] = currency_name
-            data = data[["Адрес кошелька", "Название криптовалюты", "Количество"]]
+            state_data["Название криптовалюты"] = currency_name
+            state_data = state_data[["Адрес кошелька", "Название криптовалюты", "Количество"]]
 
-            combined_data = pd.concat([combined_data, data], ignore_index=True)
+            combined_data = pd.concat([combined_data, state_data], ignore_index=True)
         except Exception as e:
             print(f"Ошибка обработки файла {file}: {e}")
 
@@ -330,7 +236,8 @@ async def merge_csv_files(directory, output_filename, required_coins):
         wallets_with_all_coins.groupby("Адрес кошелька")
         .apply(lambda x: {
             "Адрес кошелька": x["Адрес кошелька"].iloc[0],
-            "Количество": ", ".join(f"{coin}: {amount}" for coin, amount in x.groupby("Название криптовалюты")["Количество"].sum().items())
+            "Количество": ", ".join(
+                f"{coin}: {amount}" for coin, amount in x.groupby("Название криптовалюты")["Количество"].sum().items())
         })
         .apply(pd.Series)
     )
@@ -352,8 +259,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
     await callback_query.answer('В процессе...')
 
-    data = await state.get_data()
-    crypto_data = data.get("crypto_data", [])
+    state_data = await state.get_data()
+    crypto_data = state_data.get("crypto_data", [])
     required_coins = [crypto["currency_name"] for crypto in crypto_data]
     downloads_path = get_downloads_path()
 
@@ -374,7 +281,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
         input_file = FSInputFile(merged_file_path)
         await bot.send_document(callback_query.from_user.id, input_file)
         os.remove(merged_file_path)
-        await callback_query.message.answer("Все данные объединены и отправлены! Возвращаемся в главное меню...", reply_markup=types.ReplyKeyboardRemove())
+        await callback_query.message.answer("Все данные объединены и отправлены! Возвращаемся в главное меню...",
+                                            reply_markup=types.ReplyKeyboardRemove())
     else:
         await callback_query.message.answer("Не удалось найти файлы для объединения.")
 
@@ -386,7 +294,8 @@ async def process_confirmation(callback_query: types.CallbackQuery, state: FSMCo
 async def cancel_operation(callback_query: types.CallbackQuery, state: FSMContext):
     """Отмена операции и возврат в главное меню."""
     await bot.delete_message(callback_query.message.chat.id, callback_query.message.message_id)
-    await callback_query.message.answer("Операция отменена. Возвращаемся в главное меню...", reply_markup=types.ReplyKeyboardRemove())
+    await callback_query.message.answer("Операция отменена. Возвращаемся в главное меню...",
+                                        reply_markup=types.ReplyKeyboardRemove())
     await show_main_menu(callback_query.message)
     await state.clear()
 
