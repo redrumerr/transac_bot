@@ -70,12 +70,10 @@ async def in_development(callback_query: types.CallbackQuery, state: FSMContext)
 
         
 def instructions_keyboard():
-    """Меню инструкции."""
+    """Клавиатура с одной кнопкой для инструкции."""
     inline_keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual"),
-             InlineKeyboardButton(text="Видео-гайд", callback_data="video"),
-             InlineKeyboardButton(text="Как разбить текст по столбцам в Excel", callback_data="excel")]
+            [InlineKeyboardButton(text="Руководство по использованию", callback_data="manual")]
         ]
     )
     return inline_keyboard
@@ -83,24 +81,25 @@ def instructions_keyboard():
 
 @dp.callback_query(lambda c: c.data == "instructions")
 async def instructions(callback_query: types.CallbackQuery):
-    """Отправка инструкции."""
+    """Отправка инструкции с одной кнопкой."""
     await bot.send_message(
         callback_query.message.chat.id,
-        "Выберите раздел инструкции",
+        "Вы можете ознакомиться с руководством по использованию, нажав на кнопку ниже.",
         reply_markup=instructions_keyboard()
     )
 
 
 @dp.callback_query(lambda c: c.data == "manual")
 async def manual(callback_query: types.CallbackQuery):
-    """Отправка руководства по использованию."""
+    """Отправка текста инструкции."""
     manual_text = """
     Руководство по использованию:
     1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
-    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
-    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
-    4. Подтвердите введенные вами фильтры.
-    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
+    2. Введите количество криптовалют.
+    3. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
+    4. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
+    5. Подтвердите введенные вами фильтры.
+    6. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
     """
     await bot.send_message(
         callback_query.message.chat.id,
@@ -142,62 +141,6 @@ async def excel(callback_query: types.CallbackQuery):
         reply_markup=main_menu_keyboard()
     )
 
-
-@dp.callback_query(lambda c: c.data == "instructions")
-async def instructions(callback_query: types.CallbackQuery):
-    """Отправка инструкции."""
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Выберите раздел инструкции",
-        reply_markup=instructions_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "manual")
-async def manual(callback_query: types.CallbackQuery):
-    """Отправка руководства по использованию."""
-    manual_text = """
-    Руководство по использованию:
-    1. Нажмите на кнопку "Владельцы", чтобы получить список владельцев выбранных вами криптовалют.
-    2. Введите название или адрес криптовалют (например, Bitcoin или 0xF629...a3B9c).
-    3. Выберите диапазон фильтрации в долларах для каждой монеты поочередно (например, 5000-9000, где 5000 - нижняя граница, 9000 - верхняя).
-    4. Подтвердите введенные вами фильтры.
-    5. Список владельцев выбранных монет будет отправлен вам в виде файла в формате CSV, который вы сможете открыть в Excel.
-    """
-    await bot.send_message(
-        callback_query.message.chat.id,
-        manual_text,
-        reply_markup=main_menu_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "video")
-async def video(callback_query: types.CallbackQuery):
-    """Отправка видео-гайда."""
-    video_url = "https://www.youtube.com/shorts/yKS1yCk-aNs"  
-    await bot.send_video(
-        callback_query.message.chat.id,
-        video_url,
-        reply_markup=main_menu_keyboard()
-    )
-@dp.callback_query(lambda c: c.data == "excel")
-async def excel(callback_query: types.CallbackQuery):
-    """Отправка инструкции по разбиению текста по столбцам в Excel."""
-    images = [
-        "bot/1.jpg", 
-        "bot/2.jpg",
-        "bot/3.jpg",
-        "bot/4.jpg",
-        "bot/5.jpg",
-    ]
-    for image in images:
-        input_file = FSInputFile(image, filename=os.path.basename(image))
-        await bot.send_photo(
-            callback_query.message.chat.id,
-            photo=input_file,
-            caption="Шаг {}".format(images.index(image) + 1)
-        )
-    await bot.send_message(
-        callback_query.message.chat.id,
-        "Готово!",
-        reply_markup=main_menu_keyboard()
-    )
 
 @dp.callback_query(lambda c: c.data == "holders")
 async def handle_holders(callback_query: types.CallbackQuery, state: FSMContext):
