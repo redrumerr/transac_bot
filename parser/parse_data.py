@@ -53,9 +53,9 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
                 for row in reader:
                     try:
                         if lower_limit <= float(''.join(row['Balance'].split(','))) <= upper_limit:
-                            writer.writerow(
-                                [row['HolderAddress'],
-                                 round(float(''.join(row['Balance'].split(','))) * current_price, 2)])
+                            etherscan_link = f"https://etherscan.io/address/{row['HolderAddress']}"
+                            writer.writerow([etherscan_link,
+                                             round(float(''.join(row['Balance'].split(','))) * current_price, 2)])
                     except ValueError:
                         pass
         os.remove(downloaded_csv_path)
