@@ -162,8 +162,8 @@ async def process_amount_filter(message: types.Message, state: FSMContext):
         })
         await state.update_data(crypto_data=crypto_data)
 
-        current_index = data.get("current_index", 0) + 1
-        crypto_count = data.get("crypto_count", 0)
+        current_index = state_data.get("current_index", 0) + 1
+        crypto_count = state_data.get("crypto_count", 0)
 
         if current_index < crypto_count:
             await state.update_data(current_index=current_index)
