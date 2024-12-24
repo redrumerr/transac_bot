@@ -25,10 +25,10 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
             pyautogui.moveTo(1918, 200)
             webbrowser.register('Opera', None,
                                 webbrowser.BackgroundBrowser(
-                                    'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+                                    'C:\\Users\\Александр\\AppData\\Local\\Programs\\Opera\\opera.exe'))
             webbrowser.get('Opera').open(url, new=0)
-            pyautogui.moveTo(668, 761,
-                             4)  # наводимся на строку ввода токена ||| 2к: 668, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486, 489, 692
+            pyautogui.moveTo(927, 1042,
+                             4)  # наводимся на строку ввода токена ||| 2к: 927, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486, 489, 692
             pyautogui.click()
             pyautogui.write(token_address, 0.05)
             pyautogui.scroll(-315)
@@ -51,11 +51,16 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
                 field = ['Адрес владельца', 'Количество']
                 writer.writerow(field)
                 for row in reader:
+                    temp_coef = 1
                     try:
-                        if lower_limit <= float(''.join(row['Balance'].split(','))) <= upper_limit:
+                        if float(''.join(row['Balance'].split(','))) < 1:
+                            temp_coef = 12e10
+                        if lower_limit <= float(''.join(row['Balance'].split(','))) * temp_coef <= upper_limit:
                             etherscan_link = f"https://etherscan.io/address/{row['HolderAddress']}"
                             writer.writerow([etherscan_link,
-                                             round(float(''.join(row['Balance'].split(','))) * current_price, 2)])
+                                             round(
+                                                 float(''.join(row['Balance'].split(','))) * current_price * temp_coef,
+                                                 2)])
                     except ValueError:
                         pass
         os.remove(downloaded_csv_path)
