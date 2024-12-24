@@ -25,9 +25,9 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
             pyautogui.moveTo(1918, 200)
             webbrowser.register('Opera', None,
                                 webbrowser.BackgroundBrowser(
-                                    'C:\\Users\\Александр\\AppData\\Local\\Programs\\Opera\\opera.exe'))
+                                    'C:\\Users\\Administrator\\AppData\\Local\\Programs\\Opera\\opera.exe'))
             webbrowser.get('Opera').open(url, new=0)
-            pyautogui.moveTo(927, 1042,
+            pyautogui.moveTo(668, 761,
                              4)  # наводимся на строку ввода токена ||| 2к: 927, 1042 ||| fullhd: 668, 761 ||| fullpizdec: 146, 603 ||| polyakov komp: 587, 486, 489, 692
             pyautogui.click()
             pyautogui.write(token_address, 0.05)
@@ -46,15 +46,17 @@ async def get_holders(token_name: str, lower_limit: int = 5000, upper_limit: int
         with open(downloaded_csv_path, 'r') as csv_file:
             fieldnames = ('HolderAddress', 'Balance', 'PendingBalanceUpdate')
             reader = csv.DictReader(csv_file, fieldnames)
+            next(reader)
             with open(sent_csv_path, 'w', newline='', encoding='cp1251') as file:
                 writer = csv.writer(file)
                 field = ['Адрес владельца', 'Количество']
                 writer.writerow(field)
+
+                first_row = next(reader)
+                first_balance = float(''.join(first_row['Balance'].split(',')))
+                temp_coef = 10e11 if first_balance < 1 else 1
                 for row in reader:
-                    temp_coef = 1
                     try:
-                        if float(''.join(row['Balance'].split(','))) < 1:
-                            temp_coef = 12e10
                         if lower_limit <= float(''.join(row['Balance'].split(','))) * temp_coef <= upper_limit:
                             etherscan_link = f"https://etherscan.io/address/{row['HolderAddress']}"
                             writer.writerow([etherscan_link,
