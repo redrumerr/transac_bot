@@ -231,20 +231,12 @@ async def merge_csv_files(directory, output_filename, required_coins):
     if wallets_with_all_coins.empty:
         return None
 
-    # Группировка по адресу кошелька и сбор данных
-    grouped_data = (
-        wallets_with_all_coins.groupby("Адрес кошелька")
-        .apply(lambda x: {
-            "Адрес кошелька": x["Адрес кошелька"].iloc[0],
-            "Количество": ", ".join(
-                f"{coin}: {amount}" for coin, amount in x.groupby("Название криптовалюты")["Количество"].sum().items())
-        })
-        .apply(pd.Series)
-    )
+    # Получаем уникальные адреса кошельков
+    unique_wallets = wallets_with_all_coins[["Адрес кошелька"]].drop_duplicates()
 
     output_path = os.path.join(directory, output_filename)
     with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
-        grouped_data.to_excel(writer, sheet_name="Совпадения", index=False)
+        unique_wallets.to_excel(writer, sheet_name="Кошельки", index=False)
 
     # Удаляем исходные CSV-файлы
     for file in csv_files:
